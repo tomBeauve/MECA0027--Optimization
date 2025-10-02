@@ -35,7 +35,7 @@ def getGradient(x, functionID):
         return A @ x + b
     elif functionID == 2:
         g1 = x[0] + 2 * x[1] * np.sin(x[0]) - 0.5 * x[1]
-        g2 = x[1] - 2 * np.cos(x[0]) - 10 * np.cos([x[1]]) - 0.5 * x[0]
+        g2 = x[1] - 2 * np.cos(x[0]) - 10 * np.cos(x[1]) - 0.5 * x[0]
         return np.array([g1, g2])
 
 
@@ -54,9 +54,9 @@ def getHessian(x, functionID):
 ### Parameters ###
 
 
-functionID = 1
+functionID = 2
 xinit = np.array([1, 0])  # initial point
-MaxIter = 100  # Maximum number of iterations
+MaxIter = 1000  # Maximum number of iterations
 Epsilon = 1e-5  # Tolerance for the stop criteria
 
 ### Initialization ###
@@ -69,7 +69,7 @@ method = int(input())
 
 n = 2  # Dimension of the problem
 xinit = xinit.reshape(2, 1)  # To be sure that it's a column vector
-x = np.zeros((n, MaxIter))  # Initialization of vector x
+x = np.zeros((n, MaxIter+1))  # Initialization of vector x
 x[:, 0] = xinit[:, 0]  # Put xinit in vector x.
 
 ### Methods ###
@@ -78,7 +78,7 @@ if method == 1:
 
     print("You chose the steepest descent method.")
 
-    for i in range(MaxIter-1):
+    for i in range(MaxIter):
         gradient = getGradient(x[:, i], functionID)
         if np.linalg.norm(x[:, i] - x[:, i-1]) < Epsilon or np.linalg.norm(gradient) < Epsilon:
             break
@@ -94,12 +94,23 @@ if method == 1:
 elif method == 2:
 
     print("You chose the conjugate gradients method with Fletcher-Reeves update rule.")
-
+    gradient_k = getGradient(x[:, 0], functionID)
+    d_k = -gradient_k
     for i in range(MaxIter):
+        if np.linalg.norm(gradient_k) < Epsilon:
+            break
 
-        # ---------------------------------------------------------------------------
-        # ADD YOUR CODE
-        pass  # Remove this 'pass' statement once you've added your code
+        alphak = getAlpha(x, d_k, getHessian(
+            x[:, i], functionID), getGradient(x[:, i], functionID), functionID)
+
+        x_kPlus1 = x[:, i] + alphak*d_k
+        gradient_kPlus1 = getGradient(x_kPlus1, functionID)
+
+        beta_k = (np.linalg.norm(gradient_kPlus1)**2) / \
+            (np.linalg.norm(gradient_k)**2)
+        d_k = -gradient_kPlus1 + beta_k*d_k
+        gradient_k = gradient_kPlus1
+        x[:, i + 1] = x_kPlus1
 
     x = x[:, :i + 1]  # Remove the zero elements due to the initialization step
 
