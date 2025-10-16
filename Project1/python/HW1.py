@@ -20,14 +20,14 @@ from getObjFVal import getObjFVal
 from plotOptimizationPath import plotOptimizationPath
 
 
-def getAlpha(x, s, A, g, functionID, searchType=3):
+def getAlpha(x, s, A, g, functionID, searchType=1):
 
     # searchType:
     # 1: basic formula for SCQF : OK FOR SCQF
-    # 2: Newton Raphson Method : NOT ok
-    # 3: Secant method : ok
-    # 4: Dichotomy Method : ok
-    # 5: quadratic interpolation : ok
+    # 2: Newton Raphson Method : ok for method 1 and 2 for function 1 and 2
+    # 3: Secant method : ok for method 1 and 2 for function 1 and 2
+    # 4: Dichotomy Method : ok for method 1 and 2 for function 1 and 2
+    # 5: quadratic interpolation : ok for method 1 and 2 for function 1
 
     if searchType == 1:  # basic formula for SCQF
         alpha = -(s.T @ g) / (s.T @ A @ s)
@@ -46,17 +46,19 @@ def getAlpha(x, s, A, g, functionID, searchType=3):
     elif searchType == 3:  # Secant method
         alphakMinus1 = 0
         g_kMinus1 = g
-        alphak = 1e-5
+        alphak = 0.01
         g_k = getGradient(x + alphak * s, functionID)
 
-        for i in range(10):
-            if abs(s.T @ g_k) < 1e-5:
+        for i in range(20):
+            if abs(s.T @ g_k) < 1e-7 :
                 break
-            alphak = alphak - np.dot(s, g_k) * \
-                (alphak - alphakMinus1)/(np.dot(s, g_k) - np.dot(s, g_kMinus1))
+            
+            alphakPlus1 = alphak - (np.dot(s, g_k) * 
+                               (alphak - alphakMinus1)/(np.dot(s, g_k) - np.dot(s, g_kMinus1)))
 
             g_kMinus1 = g_k
             alphakMinus1 = alphak
+            alphak = alphakPlus1
             g_k = getGradient(x + alphak * s, functionID)
         return alphak
 
@@ -90,7 +92,7 @@ def getAlpha(x, s, A, g, functionID, searchType=3):
         alpha2 = delta
         alpha3 = 2 * delta
         delta = 2 * delta
-        print("hello world")
+        
 
         f1 = getObjFVal(x + alpha1 * s, functionID)
         f2 = getObjFVal(x + alpha2 * s, functionID)
@@ -146,7 +148,7 @@ def getAlpha(x, s, A, g, functionID, searchType=3):
                     alpha1 = alphaOpt
                     f1 = fOpt
             i = i + 1
-        print("bye world")
+        
 
         return alpha2
 
@@ -162,6 +164,10 @@ def getGradient(x, functionID):
         g1 = x[0] + 2 * x[1] * np.sin(x[0]) - 0.5 * x[1]
         g2 = x[1] - 2 * np.cos(x[0]) - 10 * np.cos(x[1]) - 0.5 * x[0]
         return np.array([g1, g2])
+    elif functionID == 3:
+        g1 = 0.2 * x[0] + 0.3 * x[1] * np.sin(x[0]) - 0.1 * x[1]
+        g2 = 0.2 * x[1] - 0.3 * np.cos(x[0]) - 3 * np.cos(x[1]) - 0.1 * x[0]
+        return np.array([g1, g2])
 
 
 def getHessian(x, functionID):
@@ -175,12 +181,19 @@ def getHessian(x, functionID):
         h21 = h12
         H = np.array([[h11, h12], [h21, h22]])
         return H
+    elif functionID == 3:
+        h11 = 0.2 + 0.3 * x[1] * np.cos(x[0])
+        h22 = 0.2 + 3 * np.sin(x[1])
+        h12 = 0.3 * np.sin(x[0]) - 0.1
+        h21 = h12
+        H = np.array([[h11, h12], [h21, h22]])
+        return H
 
 ### Parameters ###
 
 
 functionID = 2
-xinit = np.array([1, 0])  # initial point
+xinit = np.array([1, 1])  # initial point
 MaxIter = 100  # Maximum number of iterations
 Epsilon = 1e-5  # Tolerance for the stop criteria
 

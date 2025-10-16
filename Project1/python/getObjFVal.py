@@ -7,6 +7,9 @@ def getObjFVal(x, functionID):
     elif functionID == 2:
         fval = 0.5*(x[0]**2 + x[1]**2) - 2 * cos(x[0]) * \
             x[1] - 10 * sin(x[1]) - 0.5 * x[0]*x[1]
+    elif functionID == 3:
+        fval = 0.1*(x[0]**2 + x[1]**2) - 0.3 * cos(x[0]) * \
+            x[1] - 3 * sin(x[1]) - 0.1 * x[0]*x[1]
 
     else:
         raise ValueError("Unknown functionID")
