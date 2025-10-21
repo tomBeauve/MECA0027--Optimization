@@ -5,7 +5,7 @@ from getObjFVal import getObjFVal, getGradient, getHessian
 alphaEpsilon = 1e-9
 
 
-def getAlpha(x, s, A, g, functionID, searchType=4):
+def getAlpha(x, s, A, g, functionID, searchType=1):
 
     # searchType:
     # 1: basic formula for SCQF : OK FOR SCQF
