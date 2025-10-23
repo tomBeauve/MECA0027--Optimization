@@ -15,6 +15,8 @@
 # 3) BFGS Quasi-Newton
 
 
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 import numpy as np
 from getObjFVal import getObjFVal, getGradient, getHessian
 from lineSearch import getAlpha
@@ -25,8 +27,8 @@ from counters import counters
 ### Parameters ###
 
 
-functionID = 3
-xinit = np.array([1, 0])  # initial point
+functionID = 1
+xinit = np.array([10, 10])  # initial point
 MaxIter = 100  # Maximum number of iterations
 Epsilon_grad = 1e-3  # Tolerance for the gradient norm
 Epsilon_step = 1e-6  # Tolerance for the step size
@@ -94,7 +96,9 @@ elif method == 3:
     print("iteration: 0")
     print(H_k)
     g_k = getGradient(x_k, functionID)
-    delta_k = -(H_k @ g_k)
+    delta_k = -(H_k @ g_k) * getAlpha(x_k, -H_k @ g_k,
+                                      H_k, g_k, functionID, searchType=4)
+    delta_k = delta_k
     for i in range(MaxIter):
         x_kPlus1 = (x_k + delta_k)
         x[:, i + 1] = x_kPlus1
@@ -106,10 +110,13 @@ elif method == 3:
         H_k = H_k + (1 + (gamma_k.T @ H_k @ gamma_k)/(delta_k.T @
                                                       gamma_k)) * (np.outer(delta_k, delta_k)/(delta_k.T @ gamma_k)) - ((np.outer(delta_k, gamma_k) @ H_k + H_k @ np.outer(gamma_k, delta_k))/(delta_k.T @ gamma_k))
         print("iteration:", i+1)
-        print(H_k)
+        print(x_kPlus1)
+        # print(H_k)
         x_k = x_kPlus1
         g_k = g_kPlus1
-        delta_k = (- H_k @ g_k)
+        delta_k = (-H_k @ g_k)
+        delta_k = delta_k * getAlpha(x_k, -H_k @ g_k,
+                                     H_k, g_k, functionID, searchType=4)
 
     x = x[:, :i + 1]  # Remove the zero elements due to the initialization step
 
@@ -134,3 +141,6 @@ if plotPath:
 plotVal = False
 if plotVal:
     plotOptiValues(x, functionID)
+
+
+# plot_function_3D(functionID)

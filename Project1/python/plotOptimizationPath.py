@@ -22,7 +22,7 @@ def plotOptimizationPath(x, functionID):
     plt.axis('square')
 
     # You can let pyplot choose automatically the contour levels, or you can specify them yourself
-    automatic_contour_levels = True
+    automatic_contour_levels = False
 
     if automatic_contour_levels:
         # Automatically calculate contour levels
@@ -31,8 +31,9 @@ def plotOptimizationPath(x, functionID):
     else:
         switch_dict = {
             # CHOOSE HERE THE CONTOUR LEVELS
-            1: (np.arange(0, 2000, 10), 'Contour for Function 1'),
-            2: (np.arange(-20, 250, 10), 'Contour for Function 2')
+            1: (np.arange(0, 2000, 50), 'Contour for Function 1'),
+            2: (np.arange(-20, 250, 5), 'Contour for Function 2'),
+            3: (np.arange(-20, 250, 1), 'Contour for Function 2')
         }
 
         levels, title_text = switch_dict.get(
@@ -73,4 +74,30 @@ def plotOptiValues(x, functionID):
 
     plt.plot(range(len(obj_values)), obj_values, marker='o', linestyle='-')
     plt.grid(True)
+    plt.show()
+
+
+def plot_function_3D(functionID):
+    # Define the domain
+    x = np.linspace(-15, 15, 200)
+    y = np.linspace(-15, 15, 200)
+    X, Y = np.meshgrid(x, y)
+
+    Z = [getObjFVal([Xi, Yi], functionID)
+         for Xi, Yi in zip(np.ravel(X), np.ravel(Y))]
+    Z = np.array(Z).reshape(X.shape)
+    title = f'3D Surface Plot of Function {functionID}'
+    # Create the figure
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot the surface
+    ax.plot_surface(X, Y, Z, cmap='viridis', edgecolor='none')
+
+    # Labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title(title)
+
     plt.show()
