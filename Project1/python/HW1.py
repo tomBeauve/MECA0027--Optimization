@@ -27,7 +27,7 @@ from counters import counters
 ### Parameters ###
 
 
-functionID = 1
+functionID = 3
 if functionID == 1:
     xinit = np.array([10.5, -5.5])  # initial point
 elif functionID == 3:
@@ -106,7 +106,7 @@ elif method == 3:
     H_k = np.eye(n)  # Identity matrix
     g_k = getGradient(x_k, functionID)
     delta_k = -(H_k @ g_k) * getAlpha(x_k, -H_k @ g_k,
-                                      H_k, g_k, functionID, searchType=4)
+                                      H_k, g_k, functionID, searchType=3)
     delta_k = delta_k
     for i in range(MaxIter):
         x_kPlus1 = (x_k + delta_k)
@@ -125,7 +125,7 @@ elif method == 3:
         g_k = g_kPlus1
         delta_k = (-H_k @ g_k)
         delta_k = delta_k * getAlpha(x_k, -H_k @ g_k,
-                                     H_k, g_k, functionID, searchType=4)
+                                     H_k, g_k, functionID, searchType=3)
 
     x = x[:, :i + 1]  # Remove the zero elements due to the initialization step
 

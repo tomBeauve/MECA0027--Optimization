@@ -5,7 +5,7 @@ from getObjFVal import getObjFVal, getGradient, getHessian
 alphaEpsilon = 1e-9
 
 
-def getAlpha(x, s, A, g, functionID, searchType=1):
+def getAlpha(x, s, A, g, functionID, searchType=3):
 
     # searchType:
     # 1: basic formula for SCQF : OK FOR SCQF
@@ -31,39 +31,39 @@ def getAlpha(x, s, A, g, functionID, searchType=1):
     elif searchType == 3:  # Secant method
         alphakMinus1 = 0
         g_kMinus1 = g
-        alphak = 1
+        alphak = 3*1e-10
         g_k = getGradient(x + alphak * s, functionID)
-        
+
         for i in range(100):
-            if abs(alphak - alphakMinus1) < alphaEpsilon and abs(s.T @ g_k) < alphaEpsilon: 
+            if abs(alphak - alphakMinus1) < alphaEpsilon and abs(s.T @ g_k) < alphaEpsilon:
                 break
 
             alphakPlus1 = alphak - (np.dot(s, g_k) *
                                     (alphak - alphakMinus1)/(np.dot(s, g_k) - np.dot(s, g_kMinus1)))
-            
+
             g_kMinus1 = g_k
             alphakMinus1 = alphak
             alphak = alphakPlus1
             g_k = getGradient(x + alphak * s, functionID)
-        
+
         return alphak
 
     elif searchType == 4:  # Dichotomy Method
         rho = 0.5  # bissection
         stepLength = 1
         alphaLow = 0
-        
+
         # assume gradient*s in alpha = 0 is negative
 
         # initialization
         alphaHigh = stepLength
         g_high = getGradient(x + alphaHigh * s, functionID)
-        
+
         while s.T @ g_high < 0:
             alphaLow = alphaHigh
             alphaHigh = alphaHigh + stepLength
             g_high = getGradient(x + alphaHigh * s, functionID)
-            
+
         while abs(alphaHigh - alphaLow) > alphaEpsilon and abs(s.T @ g_high) > alphaEpsilon:
             alpha_new = alphaHigh - rho * (alphaHigh - alphaLow)
             g_new = getGradient(x + alpha_new * s, functionID)
@@ -72,8 +72,8 @@ def getAlpha(x, s, A, g, functionID, searchType=1):
             else:
                 alphaHigh = alpha_new
                 g_high = g_new
-                
-        return (alphaHigh + alphaLow) / 2 # in the middle of the interval
+
+        return (alphaHigh + alphaLow) / 2  # in the middle of the interval
 
     elif searchType == 5:  # quadratic interpolation
         delta = 1
@@ -138,16 +138,3 @@ def getAlpha(x, s, A, g, functionID, searchType=1):
             i = i + 1
 
         return alpha2
-
-
-
-
-
-
-
-
-
-
-
-
-
