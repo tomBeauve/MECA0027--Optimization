@@ -1,10 +1,11 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from getObjFVal import getObjFVal, getGradient, getHessian
 from lineSearch import getAlpha
 from matplotlib import pyplot as plt
 
 
-def opti(method, functionID, x, Epsilon_grad=1e-3, Epsilon_step=1e-6, MaxIter=100):
+def opti(method, functionID, x, Epsilon_grad=1e-3, Epsilon_step=1e-3, MaxIter=100):
     n = 2
     if method == 1:
 
@@ -38,7 +39,13 @@ def opti(method, functionID, x, Epsilon_grad=1e-3, Epsilon_step=1e-6, MaxIter=10
 
             beta_k = (np.linalg.norm(gradient_kPlus1)**2) / \
                 (np.linalg.norm(gradient_k)**2)
-            d_k = -gradient_kPlus1 + beta_k*d_k
+            if functionID == 1:
+                d_k = -gradient_kPlus1 + beta_k*d_k
+            else:
+                if i % (n) == 0:
+                    d_k = -gradient_kPlus1  # Re-initialize every n iterations, slide 110
+                else:
+                    d_k = -gradient_kPlus1 + beta_k*d_k
             gradient_k = gradient_kPlus1
             x[:, i + 1] = x_kPlus1
 
@@ -72,43 +79,106 @@ def opti(method, functionID, x, Epsilon_grad=1e-3, Epsilon_step=1e-6, MaxIter=10
     return x
 
 
-MaxIter = 100
 n = 2
-functionID = 1
+MaxIter = 100
+functionID = 3
 
 
-methods = [1, 2, 3]  # 1: SD, 2: CG, 3: BFGS
-method_names = ['Steepest Descent', 'Conjugate Gradient', 'BFGS']
+def FvalueVSIter():
 
-Epsilon_grad_list = [1e-1, 1e-2, 1e-3, 1e-4,
-                     1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10]
+    methods = [1, 2, 3]  # 1: SD, 2: CG, 3: BFGS
+    method_names = ['Steepest Descent', 'Conjugate Gradient', 'BFGS']
+    markers = ['o', 's', '^']
+    colors = ['tab:blue', 'tab:orange', 'tab:green']
 
-N_all = np.zeros((len(methods), len(Epsilon_grad_list)))
+    # Choose initial point depending on function
+    if functionID == 1:
+        xinit = np.array([10.5, -5.5])
+    elif functionID == 3:
+        xinit = np.array([13.5, 1])
 
-for m_idx, method in enumerate(methods):
-    for i, Epsilon_grad in enumerate(Epsilon_grad_list):
-        xinit = np.array([10.5, -5.5])  # initial point
+    plt.figure(figsize=(10, 6))
+    markers = ['o', 's', '^']
+
+    for m_idx, method in enumerate(methods):
+        if functionID == 1:
+            xinit = np.array([10.5, -5.5])
+        elif functionID == 3:
+            xinit = np.array([13.5, 1])
+
         x = np.zeros((n, MaxIter + 1))
         x[:, 0] = xinit
-        x_result = opti(method, functionID, x, Epsilon_grad=Epsilon_grad)
-        N_all[m_idx, i] = x_result.shape[1] - 1  # number of iterations
+        x_result = opti(method, functionID, x)  # returns number of iterations
+        N_iter = x_result.shape[1]
+        f_values = [getObjFVal(x[:, k], functionID) for k in range(N_iter)]
+        plt.plot(range(N_iter), f_values,
+                 marker=markers[m_idx], label=method_names[m_idx])
 
-# Plotting
-plt.figure(figsize=(10, 6))
-markers = ['o', 's', '^']
-for m_idx, method in enumerate(methods):
-    plt.scatter(Epsilon_grad_list, N_all[m_idx, :], marker=markers[m_idx],
-                label=method_names[m_idx])
+    plt.xlabel('k', fontsize=16)
+    plt.ylabel(rf'$f_{{{functionID}}}(x_k)$', fontsize=20)
+    plt.grid(True, which='both', linestyle='--', alpha=0.5)
+    plt.tick_params(axis='both', labelsize=14)
+    plt.legend(fontsize=14)
+    plt.tight_layout()
+    plt.savefig('plots/functionValue_vs_iterF' +
+                f'{functionID}' + '.pdf', dpi=300)
+    plt.show()
 
-plt.xscale('log')
-plt.xlabel(r'$\varepsilon_{\mathrm{grad}}$', fontsize=16)
-plt.ylabel('N', fontsize=20)
-plt.gca().invert_xaxis()  # smaller tolerances on the right
-plt.grid(True, which='both', linestyle='--', alpha=0.5)
-plt.tick_params(axis='both', which='major', labelsize=16, width=1.5)
-plt.tick_params(axis='both', which='minor', labelsize=16)
 
-plt.legend()
-plt.tight_layout()
-plt.savefig(r'plots/epsGrad_f1allMethods.pdf', dpi=300)
-plt.show()
+def NVSEpsilon():
+    # Define the methods: 1 = Steepest Descent, 2 = CG, 3 = BFGS
+    methods = [1, 2, 3]
+    method_names = ['Steepest Descent', 'Conjugate Gradient', 'BFGS']
+    markers = ['o', 's', '^']
+
+    # Define the tested epsilon values (gradient norm tolerance)
+    eps_values = np.logspace(-1, -9, 9)  # from 1e-1 to 1e-9 (log scale)
+
+    # Store number of iterations for each method and epsilon
+    N_all = np.zeros((len(methods), len(eps_values)))
+
+    for m_idx, method in enumerate(methods):
+        for e_idx, eps in enumerate(eps_values):
+
+            # Set functionID and initial point
+            if functionID == 1:
+                xinit = np.array([10.5, -5.5])
+            elif functionID == 3:
+                xinit = np.array([13.5, 1])
+            else:
+                raise ValueError("Unsupported functionID")
+
+            # Allocate storage for iterates
+            x = np.zeros((n, MaxIter + 1))
+            x[:, 0] = xinit
+
+            # Call optimization routine with current epsilon
+            x_result = opti(method, functionID, x, eps)
+            N_iter = x_result.shape[1] - 1
+
+            # Store number of iterations until convergence
+            N_all[m_idx, e_idx] = N_iter
+
+    # Plotting
+    plt.figure(figsize=(9, 6))
+    for m_idx, method in enumerate(methods):
+        plt.scatter(
+            eps_values, N_all[m_idx],
+            marker=markers[m_idx],
+            label=method_names[m_idx]
+        )
+
+    plt.xscale('log')
+    plt.xlabel(r'$\varepsilon_{\mathrm{grad}}$', fontsize=16)
+    plt.ylabel('Number of iterations $N$', fontsize=16)
+    # plt.title('Convergence study with respect to $\varepsilon_{\mathrm{grad}}$', fontsize=15)
+    plt.gca().invert_xaxis()  # smaller tolerances on the right
+    plt.grid(True, which='major', linestyle='--', alpha=0.5)
+    plt.tick_params(axis='both', which='major', labelsize=14, width=1.2)
+    plt.legend(fontsize=13)
+    plt.tight_layout()
+    plt.savefig('plots/epsGrad_f1allMethods.pdf', dpi=300)
+    plt.show()
+
+
+FvalueVSIter()

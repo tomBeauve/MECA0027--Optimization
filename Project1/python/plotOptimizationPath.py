@@ -15,11 +15,13 @@ def plotOptimizationPath(x, functionID):
             f[j, i] = getObjFVal([xi[i], xi[j]], functionID)
 
     plt.figure(figsize=(10, 8))
-    plt.title('Optimization Path and Contour Plot')
-    plt.xlabel('x_1')
-    plt.ylabel('x_2')
+    # plt.title('Optimization Path and Contour Plot')
+    plt.xlabel(r'$x$', fontsize=20)
+    plt.ylabel(r'$y$', fontsize=20)
     plt.axis([lb, up, lb, up])
     plt.axis('square')
+    plt.tick_params(axis='both', which='major', labelsize=16, width=1.5)
+    plt.tick_params(axis='both', which='minor', labelsize=16)
 
     # You can let pyplot choose automatically the contour levels, or you can specify them yourself
     automatic_contour_levels = False
@@ -33,7 +35,7 @@ def plotOptimizationPath(x, functionID):
             # CHOOSE HERE THE CONTOUR LEVELS
             1: (np.arange(0, 2000, 50), 'Contour for Function 1'),
             2: (np.arange(-20, 250, 5), 'Contour for Function 2'),
-            3: (np.arange(-20, 250, 1), 'Contour for Function 2')
+            3: (np.arange(-20, 250, 5), 'Contour for Function 2')
         }
 
         levels, title_text = switch_dict.get(
@@ -61,7 +63,7 @@ def plotOptimizationPath(x, functionID):
              markerfacecolor='red', markeredgecolor='black')
     plt.text(x[0, -1], x[1, -1], str(ind - 1),
              horizontalalignment='center', verticalalignment='center', fontsize=8)
-
+    # plt.savefig('plots\Path_Function' + str(functionID) + 'M2' '.pdf', dpi=300)
     plt.show()
 
 

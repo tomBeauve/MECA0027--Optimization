@@ -28,10 +28,13 @@ from counters import counters
 
 
 functionID = 1
-xinit = np.array([10, 10])  # initial point
+if functionID == 1:
+    xinit = np.array([10.5, -5.5])  # initial point
+elif functionID == 3:
+    xinit = np.array([13.5, 1])  # initial point
 MaxIter = 100  # Maximum number of iterations
 Epsilon_grad = 1e-3  # Tolerance for the gradient norm
-Epsilon_step = 1e-6  # Tolerance for the step size
+Epsilon_step = 1e-3  # Tolerance for the step size
 
 ### Initialization ###
 
@@ -82,7 +85,15 @@ elif method == 2:
 
         beta_k = (np.linalg.norm(gradient_kPlus1)**2) / \
             (np.linalg.norm(gradient_k)**2)
-        d_k = -gradient_kPlus1 + beta_k*d_k
+
+        if functionID == 1:
+            d_k = -gradient_kPlus1 + beta_k*d_k
+        else:
+            if i % (n) == 0:
+                d_k = -gradient_kPlus1  # Re-initialize every n iterations, slide 110
+            else:
+                d_k = -gradient_kPlus1 + beta_k*d_k
+
         gradient_k = gradient_kPlus1
         x[:, i + 1] = x_kPlus1
 
@@ -93,8 +104,6 @@ elif method == 3:
     print("You chose the BFGS Quasi-Newton method.")
     x_k = x[:, 0]
     H_k = np.eye(n)  # Identity matrix
-    print("iteration: 0")
-    print(H_k)
     g_k = getGradient(x_k, functionID)
     delta_k = -(H_k @ g_k) * getAlpha(x_k, -H_k @ g_k,
                                       H_k, g_k, functionID, searchType=4)
@@ -109,8 +118,8 @@ elif method == 3:
 
         H_k = H_k + (1 + (gamma_k.T @ H_k @ gamma_k)/(delta_k.T @
                                                       gamma_k)) * (np.outer(delta_k, delta_k)/(delta_k.T @ gamma_k)) - ((np.outer(delta_k, gamma_k) @ H_k + H_k @ np.outer(gamma_k, delta_k))/(delta_k.T @ gamma_k))
-        print("iteration:", i+1)
-        print(x_kPlus1)
+        # print("iteration:", i+1)
+        # print(x_kPlus1)
         # print(H_k)
         x_k = x_kPlus1
         g_k = g_kPlus1
@@ -133,7 +142,7 @@ print(f'The optimal point is: x = {x[0, -1]:.5f}, y = {x[1, -1]:.5f}.')
 print(
     f'The objective function value is: {getObjFVal(x[:, -1], functionID):.5f}.')
 
-plotPath = False
+plotPath = True
 if plotPath:
     plotOptimizationPath(x, functionID)
 
