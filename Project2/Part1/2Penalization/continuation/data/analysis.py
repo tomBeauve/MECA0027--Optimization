@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 report_params = {
     # Text Sizes (smaller, readable in print)
     'font.size': 18,            # General default
-    'axes.labelsize': 18,       # x and y labels
+    'axes.labelsize': 24,       # x and y labels
     'axes.titlesize': 18,       # Title
     'xtick.labelsize': 16,      # Tick numbers
     'ytick.labelsize': 16,
@@ -57,10 +57,10 @@ plt.plot(idx, densityHigh, label="Density High")
 
 
 plt.vlines(penaltyChange, ymin=0, ymax=60, colors='r',
-           linestyles="--", linewidth=1, label="penalty increasess")
+           linestyles="--", linewidth=1, label="Increment of p")
 
-plt.xlabel("iteration")
-plt.ylabel("Density %")
+plt.xlabel("Iteration")
+plt.ylabel("Density [%]")
 
 plt.grid(True, which='both', linestyle='--', linewidth=0.6, alpha=0.5)
 plt.legend(loc='upper right', frameon=True)
@@ -72,7 +72,7 @@ plt.plot(idx, CMax, label="")
 plt.vlines(penaltyChange, ymin=0, ymax=np.max(CMax), colors='r',
            linestyles="--", linewidth=1, label="penalty increasess")
 
-plt.xlabel("iteration")
+plt.xlabel("Iteration ")
 plt.ylabel("Compliance")
 
 plt.grid(True, which='both', axis='y',
